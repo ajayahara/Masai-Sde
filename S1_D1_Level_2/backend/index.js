@@ -27,21 +27,65 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post('/upload', upload.array('pdfFiles', 3), async (req, res) => {
+app.post('/upload', upload.array('pdfFiles', 5), async (req, res) => {
   const { files } = req;
-  const textContents = [];
+  let textContents = '';
   for (const file of files) {
     try {
       const dataBuffer = fs.readFileSync(file.path);
       const data = await PdfParse(dataBuffer);
-      textContents.push(data.text);
+      textContents+=data.text;
+      fs.unlinkSync(file.path)
     } catch (error) {
-      console.error('Error extracting text from PDF:', error);
+      console.error('Error extracting text from PDF:',file.path);
     }
   }
-  res.json({ textContents });
-});
+  try {
+    const response = await axios.post('https://api.openai.com/v1/engines/text-davinci-003/completions', {
+      prompt: `Please provide a concise summary of the text below, which contains various types of content, including but not limited to informative, descriptive, and argumentative passages. The summary should capture the key points and main ideas presented in the text.Make sure that if there are different type of topics then separate it by "*" symbol.
+      The text is ${textContents}`,
+      max_tokens: 150,
+      temperature: 1,
+      n: 1
+    },{
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
+    const summary = response.data.choices[0].text.trim();
+    res.json({ summary:summary||'couldnot generate the summary' });
+  } catch (error) {
+    console.error('Error:', error?.response?.data);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+app.post('/textgen', async (req, res) => {
+  const {text}=req.body;
+  if(!text){
+    return res.json({error:'Some keys missing data'});
+  }
+  try {
+    const response = await axios.post('https://api.openai.com/v1/engines/text-davinci-003/completions', {
+      prompt:`Write a creative and relevant sentence about ${text}`,
+      max_tokens: 150,
+      temperature: 1,
+      n: 1
+    }, {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const genText = response.data.choices[0].text.trim();
+    return res.json({ genText });
+  } catch (error) {
+    console.error('Error:', error?.response?.data);
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+});
 app.post('/sentimate',async (req,res)=>{
   const {text}=req.body;
     try {
@@ -64,7 +108,31 @@ app.post('/sentimate',async (req,res)=>{
         res.status(500).json({ error: 'Something went wrong' });
       }
 })
+app.post('/summerize', async (req, res) => {
+  const {article}=req.body;
+  if(!article){
+    return res.json({error:'Some keys missing data'});
+  }
+  try {
+    const response = await axios.post('https://api.openai.com/v1/engines/text-davinci-003/completions', {
+      prompt:`Summarize the following article:\n${article}\nSummary:`,
+      max_tokens: 150,
+      temperature: 1,
+      n: 1
+    }, {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
+    const summary = response.data.choices[0].text.trim();
+    return res.json({ summary });
+  } catch (error) {
+    console.error('Error:', error?.response?.data);
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

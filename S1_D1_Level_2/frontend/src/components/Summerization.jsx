@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 const FileUpload = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [summary,setSummary]=useState('');
 
   const handleFileChange = (e) => {
     setSelectedFiles([...selectedFiles, ...e.target.files]);
@@ -19,7 +20,7 @@ const FileUpload = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        setSummary(data?.summary)
       })
       .catch((error) => {
         console.error('Error uploading files: ', error);
@@ -27,8 +28,8 @@ const FileUpload = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg bg-white shadow-lg">
-      <h2 className="text-2xl font-semibold mb-4">Upload PDF Files</h2>
+    <div className="mx-auto mt-10 p-6 border rounded-lg bg-gray-400 mb-6 shadow-lg">
+      <h2 className="text-2xl font-semibold mb-4">Upload files</h2>
 
       <div className="mb-4">
         <input
@@ -64,6 +65,9 @@ const FileUpload = () => {
       >
         Upload
       </button>
+      <div>
+        {summary}
+      </div>
     </div>
   );
 };
