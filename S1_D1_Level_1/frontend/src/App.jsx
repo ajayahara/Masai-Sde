@@ -1,8 +1,14 @@
-import React from 'react'
+import ArticleSummarizer from "./components/Summerize"
+import TextGenerator from "./components/TextGen"
+import TranslationApp from "./components/Translate"
 
 const App = () => {
   return (
-    <div>Helo World</div>
+    <>
+      <TextGenerator/>
+      <ArticleSummarizer />
+      <TranslationApp />
+    </>
   )
 }
 
