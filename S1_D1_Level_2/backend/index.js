@@ -3,7 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const axios=require('axios');
 const multer = require('multer');
-const pdf = require('pdf-parse');
+const fs = require('fs');
+const PdfParse = require("pdf-parse");
 // Express App
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,30 +20,25 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/'); // Define the upload directory
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname);
+    const date=new Date();
+    cb(null, file.originalname+date.getTime());
   },
 });
 
 const upload = multer({ storage: storage });
 
-app.post('/upload', upload.array('pdfFiles', 2), async (req, res) => {
+app.post('/upload', upload.array('pdfFiles', 3), async (req, res) => {
   const { files } = req;
   const textContents = [];
-
   for (const file of files) {
     try {
-      const dataBuffer = file.buffer; // Get the file buffer
-      const uint8Array = new Uint8Array(dataBuffer);
-      const data = await pdf(uint8Array);
-      // Make sure to convert the data to a string
+      const dataBuffer = fs.readFileSync(file.path);
+      const data = await PdfParse(dataBuffer);
       textContents.push(data.text);
     } catch (error) {
-      console.error('Error extracting text from a PDF:', error);
-      textContents.push('Error extracting text');
+      console.error('Error extracting text from PDF:', error);
     }
-
   }
-
   res.json({ textContents });
 });
 

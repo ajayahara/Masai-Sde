@@ -5,7 +5,7 @@ function App() {
   return (
     <>
       <FileUpload/>
-      {/* <SentimentAnalysis/> */}
+      <SentimentAnalysis/>
     </>
   )
 }
