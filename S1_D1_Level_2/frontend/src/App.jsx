@@ -1,7 +1,11 @@
+import SentimentAnalysis from "./components/Sentiment"
+import { FileUpload } from "./components/Summerization"
+
 function App() {
   return (
     <>
-      <div>Hello World</div>
+      <FileUpload/>
+      {/* <SentimentAnalysis/> */}
     </>
   )
 }
