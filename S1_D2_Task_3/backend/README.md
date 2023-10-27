@@ -1,3 +1,31 @@
+
+## Run Locally
+
+Clone the project
+
+```bash
+  git clone https://github.com/ajayahara/Masai-Sde
+```
+
+Go to the project directory
+
+```bash
+  cd .\S1_D2_Task_3\backend\
+```
+
+Install dependencies
+
+```bash
+  npm install
+```
+
+Start the server
+
+```bash
+  npm run dev
+```
+
+
 # Express Product Management API Documentation
 
 This README provides documentation for an Express project that implements a Product Management API. This API allows you to manage products and their associated reviews. The API endpoints and their descriptions are listed below:
